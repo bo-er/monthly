@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package company;
+option go_package = "github.com/bo-er/monthly/proto/company";
+import "common/common.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/field_mask.proto";
+
+service PetService {
+  rpc CreatePet(CreatePetRequest) returns (Pet) {
+    option (google.api.http) = {
+      post: "/v1/{parent=companies/*/departments/*}/pets"
+      body: "pet"
+    };
+  };
+
+  // Updates a pet's status.
+  rpc UpdatePet(UpdatePetRequest) returns (Pet) {
+    // Update maps to HTTP PATCH. Resource name is mapped to a URL path.
+    // Resource is contained in the HTTP request body.
+    option (google.api.http) = {
+      // Note the URL template variable which captures the resource name of the
+      // pet to update.
+      patch: "/v1/{pet.name=companies/*/departments/*/pets/*}"
+      body: "pet"
+    };
+  }
+}
+
+enum PetStatus{
+  PET_STATUS_IDLE = 0;
+  PET_STATUS_EATING_PAUSE = 1;
+  PET_STATUS_EATING = 2;
+}
+
+message Pet{
+  string name =1;
+  PetStatus status = 2;
+}
+
+message CreatePetRequest{
+  common.Request request = 1;
+  // The parent resource name, for example, "companies/actiontech/departments/rd".
+  string parent = 2;
+  Pet pet = 3;
+}
+
+message UpdatePetRequest {
+  // The pet resource which replaces the resource on the server.
+  Pet pet = 1;
+  // The update mask applies to the resource. For the `FieldMask` definition,
+  // see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask
+  google.protobuf.FieldMask update_mask = 2;
+}

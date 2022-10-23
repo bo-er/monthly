@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package common;
+option go_package = "github.com/bo-er/monthly/proto/common";
+message Request {
+  // this is for idempotence, the server use request_id to find out repeated requests from client
+  string request_id = 1;
+}

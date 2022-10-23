@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package company;
+option go_package = "github.com/bo-er/monthly/proto/company";
+import "common/common.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+
+
+service DepartmentService {
+  rpc CreateDepartment(CreateDepartmentRequest) returns (Department) {
+    option (google.api.http) = {
+      post: "/v1/{parent=companies/*}/departments"
+      body: "department"
+    };
+  };
+  rpc GetDepartment(GetDepartmentRequest) returns (Department) {
+    option (google.api.http) = {
+      get: "/v1/{name=companies/*/departments/*}"
+    };
+  };
+  // Updates a department.
+  rpc UpdateDepartment(UpdateDepartmentRequest) returns (Department) {
+    // Update maps to HTTP PATCH. Resource name is mapped to a URL path.
+    // Resource is contained in the HTTP request body.
+    option (google.api.http) = {
+      // Note the URL template variable which captures the resource name of the
+      // department to update.
+      patch: "/v1/{department.name=companies/*/departments/*}"
+      body: "department"
+    };
+  }
+  // Deletes a department.
+  rpc DeleteDepartment(DeleteDepartmentRequest) returns (google.protobuf.Empty) {
+    // Delete maps to HTTP DELETE. Resource name maps to the URL path.
+    // There is no request body.
+    option (google.api.http) = {
+      // Note the URL template variable capturing the multi-segment name of the
+      // department resource to be deleted, such as "companies/actiontech/departments/rd"
+      delete: "/v1/{name=companies/*/departments/*}"
+    };
+  }
+
+  // Lists department in a company.
+  rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse) {
+    // List method maps to HTTP GET.
+    option (google.api.http) = {
+      // The `parent` captures the parent resource name, such as "companies/actiontech".
+      get: "/v1/{parent=companies/*}/departments"
+    };
+  }
+}
+
+message Department {
+  // Resource name of the department. It must have the format of "companies/*/departments/*".
+  // For example: "companies/actiontech/departments/rd".
+  string name = 1;
+}
+
+message GetDepartmentRequest {
+  // Resource name of a department. For example: "companies/actiontech/departments/rd".
+  string name = 1;
+}
+
+message CreateDepartmentRequest {
+  common.Request request = 1;
+  // Resource name of the parent resource where to create the department.
+  // For example: "companies/actiontech".
+  string parent = 2;
+  Department department = 3;
+}
+
+message UpdateDepartmentRequest {
+  // The department resource which replaces the resource on the server.
+  Department department = 1;
+  // The update mask applies to the resource. For the `FieldMask` definition,
+  // see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteDepartmentRequest {
+  // The resource name of the department to be deleted, for example:
+  // "companies/actiontech/departments/rd"
+  string name = 1;
+}
+
+message ListDepartmentsRequest {
+  // The parent resource name, for example, "companies/actiontech".
+  string parent = 1;
+
+  // The maximum number of items to return.
+  int32 page_size = 2;
+
+  // The next_page_token value returned from a previous List request, if any.
+  // this indicates the index of next page, if it's empty then there is no next page.
+  string page_token = 3;
+}
+
+message ListDepartmentsResponse {
+  // The field name should match the noun "departments" in the method name.  There
+  // will be a maximum number of items returned based on the page_size field
+  // in the request.
+  repeated Department departments = 1;
+
+  // Token to retrieve the next page of results, or empty if there are no
+  // more results in the list.
+  string next_page_token = 2;
+}
+
