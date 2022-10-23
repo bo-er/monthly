@@ -11,13 +11,13 @@ import "google/protobuf/field_mask.proto";
 service DepartmentService {
   rpc CreateDepartment(CreateDepartmentRequest) returns (Department) {
     option (google.api.http) = {
-      post: "/v1/{parent=companies/*}/departments"
+      post: "/v1/companies/{company_id}/departments"
       body: "department"
     };
   };
   rpc GetDepartment(GetDepartmentRequest) returns (Department) {
     option (google.api.http) = {
-      get: "/v1/{name=companies/*/departments/*}"
+      get: "/v1/companies/{company_id}/departments/{department_id}"
     };
   };
   // Updates a department.
@@ -27,7 +27,7 @@ service DepartmentService {
     option (google.api.http) = {
       // Note the URL template variable which captures the resource name of the
       // department to update.
-      patch: "/v1/{department.name=companies/*/departments/*}"
+      patch: "/v1/companies/{company_id}/departments/{department.department_id}"
       body: "department"
     };
   }
@@ -38,7 +38,7 @@ service DepartmentService {
     option (google.api.http) = {
       // Note the URL template variable capturing the multi-segment name of the
       // department resource to be deleted, such as "companies/actiontech/departments/rd"
-      delete: "/v1/{name=companies/*/departments/*}"
+      delete: "/v1/companies/{company_id}/departments/{department_id}"
     };
   }
 
@@ -47,7 +47,7 @@ service DepartmentService {
     // List method maps to HTTP GET.
     option (google.api.http) = {
       // The `parent` captures the parent resource name, such as "companies/actiontech".
-      get: "/v1/{parent=companies/*}/departments"
+      get: "/v1/companies/{company_id}"
     };
   }
 }
@@ -56,38 +56,42 @@ message Department {
   // Resource name of the department. It must have the format of "companies/*/departments/*".
   // For example: "companies/actiontech/departments/rd".
   string name = 1;
+  string department_id = 2;
 }
 
 message GetDepartmentRequest {
   // Resource name of a department. For example: "companies/actiontech/departments/rd".
   string name = 1;
+  string company_id = 2;
+  string department_id = 3;
 }
 
 message CreateDepartmentRequest {
   common.Request request = 1;
   // Resource name of the parent resource where to create the department.
   // For example: "companies/actiontech".
-  string parent = 2;
+  string company_id = 2;
   Department department = 3;
 }
 
 message UpdateDepartmentRequest {
+  string company_id = 1;
   // The department resource which replaces the resource on the server.
-  Department department = 1;
+  Department department = 2;
   // The update mask applies to the resource. For the `FieldMask` definition,
   // see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask
-  google.protobuf.FieldMask update_mask = 2;
+  google.protobuf.FieldMask update_mask = 3;
 }
 
 message DeleteDepartmentRequest {
   // The resource name of the department to be deleted, for example:
   // "companies/actiontech/departments/rd"
-  string name = 1;
+  string company_id = 1;
+  string department_id = 2;
 }
 
 message ListDepartmentsRequest {
-  // The parent resource name, for example, "companies/actiontech".
-  string parent = 1;
+  string company_id = 1;
 
   // The maximum number of items to return.
   int32 page_size = 2;

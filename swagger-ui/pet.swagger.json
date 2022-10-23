@@ -1,0 +1,180 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "company/pet.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "PetService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/companies/{companyId}/departments/{departmentId}/pets": {
+      "post": {
+        "operationId": "PetService_CreatePet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/companyPet"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "departmentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "pet",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/companyPet"
+            }
+          },
+          {
+            "name": "request.requestId",
+            "description": "this is for idempotence, the server use request_id to find out repeated requests from client",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PetService"
+        ]
+      },
+      "patch": {
+        "summary": "Updates a pet's status.",
+        "operationId": "PetService_UpdatePet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/companyPet"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "companyId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "departmentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "pet",
+            "description": "The pet resource which replaces the resource on the server.",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/companyPet"
+            }
+          },
+          {
+            "name": "updateMask",
+            "description": "The update mask applies to the resource. For the `FieldMask` definition,\nsee https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "PetService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "commonRequest": {
+      "type": "object",
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "title": "this is for idempotence, the server use request_id to find out repeated requests from client"
+        }
+      }
+    },
+    "companyPet": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/companyPetStatus"
+        }
+      }
+    },
+    "companyPetStatus": {
+      "type": "string",
+      "enum": [
+        "PET_STATUS_IDLE",
+        "PET_STATUS_EATING_PAUSE",
+        "PET_STATUS_EATING"
+      ],
+      "default": "PET_STATUS_IDLE"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

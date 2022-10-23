@@ -9,7 +9,7 @@ import "google/protobuf/field_mask.proto";
 service PetService {
   rpc CreatePet(CreatePetRequest) returns (Pet) {
     option (google.api.http) = {
-      post: "/v1/{parent=companies/*/departments/*}/pets"
+      post: "/v1/companies/{company_id}/departments/{department_id}/pets"
       body: "pet"
     };
   };
@@ -21,7 +21,7 @@ service PetService {
     option (google.api.http) = {
       // Note the URL template variable which captures the resource name of the
       // pet to update.
-      patch: "/v1/{pet.name=companies/*/departments/*/pets/*}"
+      patch: "/v1/companies/{company_id}/departments/{department_id}/pets"
       body: "pet"
     };
   }
@@ -40,15 +40,17 @@ message Pet{
 
 message CreatePetRequest{
   common.Request request = 1;
-  // The parent resource name, for example, "companies/actiontech/departments/rd".
-  string parent = 2;
-  Pet pet = 3;
+  string company_id = 2;
+  string department_id = 3;
+  Pet pet = 4;
 }
 
 message UpdatePetRequest {
+  string company_id = 1;
+  string department_id = 2;
   // The pet resource which replaces the resource on the server.
-  Pet pet = 1;
+  Pet pet = 3;
   // The update mask applies to the resource. For the `FieldMask` definition,
   // see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask
-  google.protobuf.FieldMask update_mask = 2;
+  google.protobuf.FieldMask update_mask = 4;
 }

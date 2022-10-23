@@ -9,7 +9,7 @@ import "google/protobuf/field_mask.proto";
 service EmployeeService {
   rpc CreateEmployee(CreateEmployeeRequest) returns (Employee) {
     option (google.api.http) = {
-      post: "/v1/{parent=companies/*/departments/*}/employees"
+      post: "/v1/companies/{company_id}/departments/{department_id}/employees"
       body: "employee"
     };
   };
@@ -18,7 +18,7 @@ service EmployeeService {
     // List method maps to HTTP GET.
     option (google.api.http) = {
       // The `parent` captures the parent resource name, such as "companies/actiontech/departments/rd".
-      get: "/v1/{parent=companies/*/departments/*}/employees"
+      get: "/v1/companies/{company_id}/departments/{department_id}/employees"
       additional_bindings {
         get: "/v1/companies/{company_id}/departments/-/employees"
       }
@@ -32,7 +32,7 @@ service EmployeeService {
     option (google.api.http) = {
       // Note the URL template variable which captures the resource name of the
       // employee to update.
-      patch: "/v1/{employee.name=companies/*/departments/*/employees/*}"
+      patch: "/v1/companies/{company_id}/departments/{department_id}/employees"
       body: "employee"
     };
   }
@@ -45,15 +45,14 @@ message Employee{
 
 message CreateEmployeeRequest{
   common.Request request = 1;
-  // The parent resource name, for example, "companies/actiontech/departments/rd".
-  string parent = 2;
-  Employee employee = 3;
+  string company_id = 2;
+  string department_id = 3;
+  Employee employee = 4;
 }
 
 message ListEmployeesRequest {
-  // The parent resource name, for example, "companies/actiontech/departments/rd".
-  string parent = 1;
-  string company_id = 2;
+  string company_id = 1;
+  string department_id = 2;
   // The maximum number of items to return.
   int32 page_size = 3;
 
@@ -71,9 +70,11 @@ message ListEmployeesResponse{
 }
 
 message UpdateEmployeeRequest {
+  string company_id = 1;
+  string department_id = 2;
   // The employee resource which replaces the resource on the server.
-  Employee employee = 1;
+  Employee employee = 3;
   // The update mask applies to the resource. For the `FieldMask` definition,
   // see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask
-  google.protobuf.FieldMask update_mask = 2;
+  google.protobuf.FieldMask update_mask = 4;
 }

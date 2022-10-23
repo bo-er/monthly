@@ -10,24 +10,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	helloworldpb "github.com/bo-er/monthly/proto/helloworld"
+	pb "github.com/bo-er/monthly/proto/company"
+	servers "github.com/bo-er/monthly/servers"
 )
-
-type server struct {
-	helloworldpb.UnimplementedGreeterServer
-}
-
-func NewServer() *server {
-	return &server{}
-}
-
-func (s *server) SayHello(ctx context.Context, in *helloworldpb.HelloRequest) (*helloworldpb.HelloReply, error) {
-	return &helloworldpb.HelloReply{Message: in.Name + " world"}, nil
-}
 
 func main() {
 	// Create a listener on TCP port
-	lis, err := net.Listen("tcp", ":8080")
+	lis, err := net.Listen("tcp", ":10001")
 	if err != nil {
 		log.Fatalln("Failed to listen:", err)
 	}
@@ -35,9 +24,9 @@ func main() {
 	// Create a gRPC server object
 	s := grpc.NewServer()
 	// Attach the Greeter service to the server
-	helloworldpb.RegisterGreeterServer(s, &server{})
+	pb.RegisterDepartmentServiceServer(s, &servers.Server{})
 	// Serve gRPC server
-	log.Println("Serving gRPC on 0.0.0.0:8080")
+	log.Println("Serving gRPC on 0.0.0.0:10001")
 	go func() {
 		log.Fatalln(s.Serve(lis))
 	}()
@@ -46,7 +35,7 @@ func main() {
 	// This is where the gRPC-Gateway proxies the requests
 	conn, err := grpc.DialContext(
 		context.Background(),
-		"0.0.0.0:8080",
+		"0.0.0.0:10001",
 		grpc.WithBlock(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -55,17 +44,30 @@ func main() {
 	}
 
 	gwmux := runtime.NewServeMux()
-	// Register Greeter
-	err = helloworldpb.RegisterGreeterHandler(context.Background(), gwmux, conn)
+	ctx := context.Background()
+	err = pb.RegisterDepartmentServiceHandler(ctx, gwmux, conn)
 	if err != nil {
-		log.Fatalln("Failed to register gateway:", err)
+		log.Fatalln("Failed to register department service gateway:", err.Error())
+	}
+	pb.RegisterEmployeeServiceHandler(ctx, gwmux, conn)
+	if err != nil {
+		log.Fatalln("Failed to register employee service gateway: ", err.Error())
+	}
+
+	pb.RegisterPetServiceHandler(ctx, gwmux, conn)
+	if err != nil {
+		log.Fatalln("Failed to register pet service gateway: ", err.Error())
 	}
 
 	gwServer := &http.Server{
-		Addr:    ":8090",
+		Addr:    ":10002",
 		Handler: gwmux,
 	}
 
-	log.Println("Serving gRPC-Gateway on http://0.0.0.0:8090")
+	go func() {
+		fs := http.FileServer(http.Dir("./swagger-ui"))
+		http.Handle("/swagger", http.StripPrefix("/swagger", fs))
+	}()
+	log.Println("Serving gRPC-Gateway on http://0.0.0.0:10002")
 	log.Fatalln(gwServer.ListenAndServe())
 }
